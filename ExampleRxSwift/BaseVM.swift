@@ -10,6 +10,7 @@ import RxSwift
 import RxCocoa
 import Alamofire
 
+
 /*
  https://jsonplaceholder.typicode.com/
  Alamofire 테스트 사이트
@@ -91,11 +92,15 @@ class BaseVM: NSObject {
         return Disposables.create()
     }
     
+    let subject = PublishSubject<String>()
+    
+    let relay = PublishRelay<String>()
     
     // Single + Alamofire (RxSwift에서 만든 "RxAlamofire"랑 같음)
     func fetchData() -> Single<String> {
         return Single.create { single in
             let request = AF.request("https://jsonplaceholder.typicode.com/todos/1")
+            // String 형태로 받음
                 .responseString { response in
                     switch response.result {
                     case .success(let data):
@@ -111,5 +116,25 @@ class BaseVM: NSObject {
                 request.cancel()
             }
         }
+    }
+    
+    // MARK: Cold Observable
+    func getObservable() -> Observable<String> {
+        return Observable.create { observable in
+            observable.onNext("observable next")
+            observable.onCompleted()
+            return Disposables.create()
+        }
+    }
+    
+    // Int타입의 데이터를 방출하는 Observable
+    // create = 생성
+    let observable = Observable<Int>.create { observer in
+        // onNext = 이벤트 방출
+        observer.onNext(1)
+        observer.onNext(100)
+        // onCompleted = 이벤트 종료
+        observer.onCompleted()
+        return Disposables.create()
     }
 }
